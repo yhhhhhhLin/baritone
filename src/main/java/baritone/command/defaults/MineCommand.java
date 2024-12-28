@@ -23,6 +23,7 @@ import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.datatypes.ForBlockOptionalMeta;
 import baritone.api.command.exception.CommandException;
+import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.BlockOptionalMeta;
 
 import java.util.ArrayList;
@@ -38,12 +39,22 @@ public class MineCommand extends Command {
 
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
+        // 获取挖掘数量（默认为 0 即不限量）
         int quantity = args.getAsOrDefault(Integer.class, 0);
-        args.requireMin(1);
+
+        // 获取目标箱子的位置（x, y, z）
+        int x = args.getAs(Integer.class);
+        int y = args.getAs(Integer.class);
+        int z = args.getAs(Integer.class);
+        BetterBlockPos chestPos = new BetterBlockPos(x, y, z);
+        logDirect(chestPos.toString());
+
+        // 获取要挖掘的物品
         List<BlockOptionalMeta> boms = new ArrayList<>();
         while (args.hasAny()) {
             boms.add(args.getDatatypeFor(ForBlockOptionalMeta.INSTANCE));
         }
+
         BaritoneAPI.getProvider().getWorldScanner().repack(ctx);
         logDirect(String.format("Mining %s", boms.toString()));
         baritone.getMineProcess().mine(quantity, boms.toArray(new BlockOptionalMeta[0]));
